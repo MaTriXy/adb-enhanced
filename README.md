@@ -1,20 +1,23 @@
-# adb-enhanced [![Downloads](http://pepy.tech/badge/adb-enhanced)](http://pepy.tech/project/adb-enhanced) [![PyPI version](https://badge.fury.io/py/adb-enhanced.svg)](https://badge.fury.io/py/adb-enhanced) [![Build Status](https://travis-ci.org/ashishb/adb-enhanced.svg?branch=master)](https://travis-ci.org/ashishb/adb-enhanced)
+# ADB Enhanced [![Downloads](http://pepy.tech/badge/adb-enhanced)](http://pepy.tech/project/adb-enhanced) [![PyPI version](https://badge.fury.io/py/adb-enhanced.svg)](https://badge.fury.io/py/adb-enhanced) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/adb-enhanced/Lobby) [![Build Status](https://travis-ci.org/ashishb/adb-enhanced.svg?branch=master)](https://travis-ci.org/ashishb/adb-enhanced) [![CircleCI](https://circleci.com/gh/ashishb/adb-enhanced.svg?style=shield)](https://circleci.com/gh/ashishb/adb-enhanced)
+
+![Logo](docs/logo.png)
 
 Swiss-army knife for Android testing and development. A command-line interface to trigger various scenarios like screen rotation, battery saver mode, data saver mode, doze mode, permission grant/revocation.
 
-# Release announcement
+## Release announcement
 See [Release announcement](https://ashishb.net/tech/introducing-adb-enhanced-a-swiss-army-knife-for-android-development/)
 
 
-# Installation
+## Installation
 `sudo pip3 install adb-enhanced`
 
 ## Note
-1. `sudo pip install adb-enhanced` for python2 based install works as well but I would recommend moving to python3 since I might deprecate python2 support at some point.
+1. `sudo pip install adb-enhanced` for python2 based install works as well but I would recommend moving to python3 since I will deprecate python2 support after Dec 31, 2018.
 2. If you don't have sudo access or you are installing without sudo then `adbe` might not be configured correctly in the path.
+3. To setup bash/z-sh auto-completion, execute `sudo pip3 install infi.docopt-completion && docopt-completion $(which adbe)` after installing adb-enhanced.
 
 
-# Examples
+## Examples
 
 	
 ### Device configuration
@@ -34,6 +37,12 @@ See [Release announcement](https://ashishb.net/tech/introducing-adb-enhanced-a-s
 * Don't keep activities in the background
 
 	`adbe dont-keep-activities on`
+	
+* Take a screenshot
+	`adbe screenshot ~/Downloads/screenshot1.png`
+	
+* Take a video
+	`adbe screenrecord video.mp4 # Press ^C when finished`
 	
 ### Permisions
 
@@ -70,6 +79,8 @@ See [Release announcement](https://ashishb.net/tech/introducing-adb-enhanced-a-s
 
 	```
 	$ adbe devices
+	Unlock Device "dcc54112" and give USB debugging access to this PC/Laptop by unlocking and reconnecting the device. More info about this device: "unauthorized usb:339869696X transport_id:17"
+
 	Serial ID: dcc54111
 	Manufacturer: OnePlus
 	Model: ONEPLUS A5000 (OnePlus 5T)
@@ -90,7 +101,7 @@ See [Release announcement](https://ashishb.net/tech/introducing-adb-enhanced-a-s
 * Detailed information about app version, target SDK version, permissions (requested, granted, denied), installer package name etc.
 
 	```
-	$ adbe app-info com.google.android.youtube
+	$ adbe app info com.google.android.youtube
 	App name: com.google.android.youtube
 	Version: 12.17.41
 	Version Code: 121741370
@@ -141,69 +152,93 @@ See [Release announcement](https://ashishb.net/tech/introducing-adb-enhanced-a-s
 	Installer package name: None
 	```
 
+* App backup to a tar file unlike the Android-specific .ab format
 
-# Usage
+	```
+	$ adbe app backup com.google.android.youtube backup.tar
+	```
 
-    Usage:
-    adbe.py [options] rotate (landscape | portrait | left | right)
-    adbe.py [options] gfx (on | off | lines)
-    adbe.py [options] overdraw (on | off | deut)
-    adbe.py [options] layout (on | off)
-    adbe.py [options] airplane (on | off)
-    adbe.py [options] battery level <percentage>
-    adbe.py [options] battery saver (on | off)
-    adbe.py [options] battery reset
-    adbe.py [options] doze (on | off)
-    adbe.py [options] jank <app_name>
-    adbe.py [options] devices
-    adbe.py [options] top-activity
-    adbe.py [options] dump-ui <xml_file>
-    adbe.py [options] mobile-data (on | off)
-    adbe.py [options] mobile-data saver (on | off)
-    adbe.py [options] rtl (on | off)
-    adbe.py [options] screenshot <filename.png>
-    adbe.py [options] screenrecord <filename.mp4>
-    adbe.py [options] dont-keep-activities (on | off)
-    adbe.py [options] animations (on | off)
-    adbe.py [options] stay-awake-while-charging (on | off)
-    adbe.py [options] input-text <text>
-    adbe.py [options] press back
-    adbe.py [options] open-url <url>
-    adbe.py [options] permission-groups list all
-    adbe.py [options] permissions list (all | dangerous)
-    adbe.py [options] permissions (grant | revoke) <app_name> (calendar | camera | contacts | location | microphone | phone | sensors | sms | storage)
-    adbe.py [options] apps list (all | system | third-party | debug)
-    adbe.py [options] standby-bucket get <app_name>
-    adbe.py [options] standby-bucket set <app_name> (active | working_set | frequent | rare)
-    adbe.py [options] restrict-background (true | false) <app_name>
-    adbe.py [options] ls [-l] [-R] <file_path>
-    adbe.py [options] rm [-f] [-R] [-r] <file_path>
-    adbe.py [options] pull [-a] <remote>
-    adbe.py [options] pull [-a] <remote> <local>
-    adbe.py [options] cat <file_path>
-    adbe.py [options] start <app_name>
-    adbe.py [options] stop <app_name>
-    adbe.py [options] restart <app_name>
-    adbe.py [options] force-stop <app_name>
-    adbe.py [options] clear-data <app_name>
-    adbe.py [options] app-info <app_name>
-    adbe.py [options] app-path <app_name>
-    adbe.py [options] app-signature <app_name>
+### Usage
+    adbe [options] rotate (landscape | portrait | left | right)
+    adbe [options] gfx (on | off | lines)
+    adbe [options] overdraw (on | off | deut)
+    adbe [options] layout (on | off)
+    adbe [options] airplane (on | off)
+    adbe [options] battery level <percentage>
+    adbe [options] battery saver (on | off)
+    adbe [options] battery reset
+    adbe [options] doze (on | off)
+    adbe [options] jank <app_name>
+    adbe [options] devices
+    adbe [options] top-activity
+    adbe [options] dump-ui <xml_file>
+    adbe [options] mobile-data (on | off)
+    adbe [options] mobile-data saver (on | off)
+    adbe [options] rtl (on | off)
+    adbe [options] screenshot <filename.png>
+    adbe [options] screenrecord <filename.mp4>
+    adbe [options] dont-keep-activities (on | off)
+    adbe [options] animations (on | off)
+    adbe [options] show-taps (on | off)
+    adbe [options] stay-awake-while-charging (on | off)
+    adbe [options] input-text <text>
+    adbe [options] press back
+    adbe [options] open-url <url>
+    adbe [options] permission-groups list all
+    adbe [options] permissions list (all | dangerous)
+    adbe [options] permissions (grant | revoke) <app_name> (calendar | camera | contacts | location | microphone | phone | sensors | sms | storage)
+    adbe [options] apps list (all | system | third-party | debug | backup-enabled)
+    adbe [options] standby-bucket get <app_name>
+    adbe [options] standby-bucket set <app_name> (active | working_set | frequent | rare)
+    adbe [options] restrict-background (true | false) <app_name>
+    adbe [options] ls [-a] [-l] [-R|-r] <file_path>
+    adbe [options] rm [-f] [-R|-r] <file_path>
+    adbe [options] mv [-f] <src_path> <dest_path>
+    adbe [options] pull [-a] <file_path_on_android>
+    adbe [options] pull [-a] <file_path_on_android> <file_path_on_machine>
+    adbe [options] push <file_path_on_machine> <file_path_on_android>
+    adbe [options] cat <file_path>
+    adbe [options] start <app_name>
+    adbe [options] stop <app_name>
+    adbe [options] restart <app_name>
+    adbe [options] force-stop <app_name>
+    adbe [options] clear-data <app_name>
+    adbe [options] app info <app_name>
+    adbe [options] app path <app_name>
+    adbe [options] app signature <app_name>
+    adbe [options] app backup <app_name> [<backup_tar_file_path>]
+    adbe [options] install <file_path>
+    adbe [options] uninstall <app_name>
 
-
-# Options
+### Options
 
     -e, --emulator          directs the command to the only running emulator
     -d, --device            directs the command to the only connected "USB" device
     -s, --serial SERIAL     directs the command to the device or emulator with the given serial number or qualifier.
                             Overrides ANDROID_SERIAL environment variable.
     -l                      For long list format, only valid for "ls" command
-    -R                      For recursive directory listing, only valid for "ls" command
+    -R                      For recursive directory listing, only valid for "ls" and "rm" command
+    -r                      For delete file, only valid for "ls" and "rm" command
+    -f                      For forced deletion of a file, only valid for "rm" command
     -v, --verbose           Verbose mode
+    --no-python2-warn       Don't warn about Python 2 deprecation
     
-## Python3 compatibility
+## Python3 migration timeline
 
-As of Nov 27, 2017, the code is python3 compatible, and as of Jan 18, 2018, pip (python package manager) has the updated version.
+- Nov 27, 2017 - Code is Python3 compatible
+- Jan 18, 2018 - pip (python package manager) has the updated version which is Python3 compatible
+- Nov 15, 2018 - Python2 based installation discouraged. Python3 is recommended.
+- Dec 31, 2018 - Python2 will not be officially supported after Dec 31, 2018.
+
+## Testing
+```
+python -m pytest -v tests/adbe_tests.py  # Python2 tests
+python3 -m pytest -v tests/adbe_tests.py  # Python3 tests
+```
+
+
+## Relase a new build
+A new build can be released using [`release/release_new_build.sh`](https://github.com/ashishb/adb-enhanced/blob/master/release/release_new_build.sh) script.
 
 Note: The inspiration of this project came from [android-scripts](https://github.com/dhelleberg/android-scripts).
 
