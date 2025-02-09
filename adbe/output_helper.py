@@ -14,7 +14,7 @@ def print_message(message):
 
 def print_error_and_exit(error_string):
     print_error(error_string)
-    quit(1)
+    sys.exit(1)
 
 
 def print_error(error_string):
@@ -24,7 +24,6 @@ def print_error(error_string):
 
 
 def print_verbose(message):
-    global __VERBOSE_MODE
     if __VERBOSE_MODE:
         if _is_interactive_terminal():
             message = '%s%s%s' % (BashColors.WARNING, message, BashColors.ENDC)
@@ -36,6 +35,7 @@ def _is_interactive_terminal():
 
 
 # Coloring approach inspired from https://stackoverflow.com/a/287944
+# pylint: disable=too-few-public-methods
 class BashColors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'

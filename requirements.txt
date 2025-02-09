@@ -1,5 +1,6 @@
-asyncio
 docopt
-future
 psutil
+
 pytest
+types-docopt
+types-psutil

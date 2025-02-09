@@ -1,0 +1,76 @@
+---
+name: AdbeUnitTests-Api31
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"  # Sunday midnight UTC
+  pull_request:
+    branches: [master, main]
+    paths:
+      - ".github/workflows/adbe-unittests-api31.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testOnApi31:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        api-level: [31]
+        # API 30+ emulators only have x86_64 system images.
+        arch: ["x86_64"]
+        target: [default]  # Other option: google_apis
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      # Ref: https://github.com/ReactiveCircus/android-emulator-runner?tab=readme-ov-file#running-hardware-accelerated-emulators-on-linux-runners
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }} - ${{ matrix.arch }} - ${{ matrix.target }}
+
+      - name: Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          target: ${{ matrix.target }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          target: ${{ matrix.target }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
+          disable-animations: true
+          script: |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install --user -r requirements.txt
+            make test_python3
